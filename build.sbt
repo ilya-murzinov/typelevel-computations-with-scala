@@ -6,7 +6,8 @@ libraryDependencies ++= Seq(
 
 scalacOptions ++= Seq(
   "-deprecation",
-  "-encoding", "UTF-8",
+  "-encoding",
+  "UTF-8",
   "-feature",
   "-unchecked",
   "-language:higherKinds",

@@ -147,10 +147,10 @@ object q extends App {
     def apply[F <: Func, L <: List](implicit m: Map[F, L]): Aux[F, L, m.Out] = m
     type Aux[F <: Func, L <: List, R <: List] = Map[F, L] { type Out = R }
     implicit def m0[F <: Func]: Aux[F, Nil, Nil] = ???
-    implicit def m1[F <: Func, Head, Tail <: List, R](
+    implicit def m1[F <: Func, Head, Tail <: List, R, M <: List](
         implicit
         a: Apply[F, Head],
-        m: Map[F, Tail]): Aux[F, Head :: Tail, a.Out :: m.Out] = ???
+        m: Lazy[Map.Aux[F, Tail, M]]): Aux[F, Head :: Tail, a.Out :: M] = ???
   }
 
   trait MapCat[F <: Func, L <: List] { type Out <: List }
@@ -292,6 +292,19 @@ object q extends App {
         m: MapCat[AddQueen2[N, X], Configs]): Aux[N, X, Configs, m.Out] = ???
   }
 
+  trait AddQueens[N <: Nat, X <: Nat, Configs <: List] { type Out <: List }
+  object AddQueens {
+    def apply[N <: Nat, X <: Nat, Configs <: List](
+        implicit a: AddQueens[N, X, Configs]): Aux[N, X, Configs, a.Out] = a
+    type Aux[N <: Nat, X <: Nat, Configs <: List, R <: List] =
+      AddQueens[N, X, Configs] { type Out = R }
+    implicit def a0[N <: Nat, X <: Nat, Configs <: List, LT <: Bool, R <: List](
+        implicit
+        lt: Lt.Aux[X, N, LT],
+        aq: Lazy[AddQueensIf.Aux[LT, N, X, Configs, R]])
+      : Aux[N, X, Configs, R] = ???
+  }
+
   trait AddQueensIf[P <: Bool, N <: Nat, X <: Nat, Configs <: List] {
     type Out <: List
   }
@@ -315,150 +328,150 @@ object q extends App {
       : Aux[True, N, X, Configs, R] = ???
   }
 
-  trait AddQueens[N <: Nat, X <: Nat, Configs <: List] { type Out <: List }
-  object AddQueens {
-    def apply[N <: Nat, X <: Nat, Configs <: List](
-        implicit a: AddQueens[N, X, Configs]): Aux[N, X, Configs, a.Out] = a
-    type Aux[N <: Nat, X <: Nat, Configs <: List, R <: List] =
-      AddQueens[N, X, Configs] { type Out = R }
-    implicit def a0[N <: Nat, X <: Nat, Configs <: List, LT <: Bool, R <: List](
-        implicit
-        lt: Lt.Aux[X, N, LT],
-        aq: AddQueensIf.Aux[LT, N, X, Configs, R])
-      : Aux[N, X, Configs, R] = ???
-  }
-
   trait Solution[N <: Nat] { type Out <: List }
   object Solution {
     def apply[N <: Nat](implicit s: Solution[N]): Aux[N, s.Out] = s
     type Aux[N <: Nat, R <: List] = Solution[N] { type Out = R }
     implicit def s0[N <: Nat, Configs <: List](
         implicit
-        aq: AddQueens.Aux[N, _0, Nil :: Nil, Configs],
-        f: First[Configs]): Aux[N, Nil] = ???
+        aq: AddQueens.Aux[N, _0, Nil :: Nil, Configs]): Aux[N, Configs] = ???
   }
 
-  println(showType(AddQueensIf[True, _4, _1, (Queen[_0, _0] :: Nil) :: Nil]))
-  //println(showType(AddQueens[_4, _1, (Queen[_0, _0] :: Nil) :: Nil]))
-  //println(showType(Solution[_4]))
+  println(showType(Solution[_4]))
 
   trait Specs {
-    // implicitly[First.Aux[_1 :: Nil, _1]]
-    // illTyped("implicitly[First[Nil]]")
+    implicitly[First.Aux[_1 :: Nil, _1]]
+    illTyped("implicitly[First[Nil]]")
 
-    // implicitly[Concat.Aux[_1 :: Nil, Nil, _1 :: Nil]]
-    // implicitly[Concat.Aux[_1 :: _2 :: Nil,
-    //                       _3 :: _4 :: Nil,
-    //                       (_1 :: _2 :: _3 :: _4 :: Nil)]]
-    // illTyped("implicitly[Concat.Aux[_1 :: Nil, Nil, Nil]]")
+    implicitly[Concat.Aux[_1 :: Nil, Nil, _1 :: Nil]]
+    implicitly[
+      Concat.Aux[
+        _1 :: _2 :: Nil,
+        _3 :: _4 :: Nil,
+        (_1 :: _2 :: _3 :: _4 :: Nil)
+      ]
+    ]
+    illTyped("implicitly[Concat.Aux[_1 :: Nil, Nil, Nil]]")
 
-    // private type A = _1 :: _2 :: Nil
-    // private type B = _3 :: _4 :: Nil
-    // private type L = A :: B :: Nil
-    // private type C = _1 :: _2 :: _3 :: _4 :: Nil
-    // implicitly[ConcatAll.Aux[L, C]]
+    private type A = _1 :: _2 :: Nil
+    private type B = _3 :: _4 :: Nil
+    private type L = A :: B :: Nil
+    private type C = _1 :: _2 :: _3 :: _4 :: Nil
+    implicitly[ConcatAll.Aux[L, C]]
 
-    // implicitly[AnyTrue.Aux[True :: Nil, True]]
-    // implicitly[AnyTrue.Aux[False :: True :: Nil, True]]
-    // implicitly[AnyTrue.Aux[False :: False :: Nil, False]]
+    implicitly[AnyTrue.Aux[True :: Nil, True]]
+    implicitly[AnyTrue.Aux[False :: True :: Nil, True]]
+    implicitly[AnyTrue.Aux[False :: False :: Nil, False]]
 
-    // implicitly[Or.Aux[True, False, True]]
-    // implicitly[Or.Aux[True, False, True]]
+    implicitly[Or.Aux[True, False, True]]
+    implicitly[Or.Aux[True, False, True]]
 
-    // implicitly[Eq.Aux[_1, _1, True]]
-    // implicitly[Eq.Aux[_1, _2, False]]
+    implicitly[Eq.Aux[_1, _1, True]]
+    implicitly[Eq.Aux[_1, _2, False]]
 
-    // implicitly[Lt.Aux[_2, _2, False]]
-    // implicitly[Lt.Aux[_4, _5, True]]
-    // implicitly[Lt.Aux[_6, _5, False]]
+    implicitly[Lt.Aux[_2, _2, False]]
+    implicitly[Lt.Aux[_4, _5, True]]
+    implicitly[Lt.Aux[_6, _5, False]]
 
-    // implicitly[AbsDiff.Aux[_3, _5, _2]]
-    // implicitly[AbsDiff.Aux[_1, _6, _5]]
-    // illTyped("implicitly[AbsDiff.Aux[_1, _6, _2]]")
+    implicitly[AbsDiff.Aux[_3, _5, _2]]
+    implicitly[AbsDiff.Aux[_1, _6, _5]]
+    illTyped("implicitly[AbsDiff.Aux[_1, _6, _2]]")
 
-    // implicitly[Range.Aux[_0, Nil]]
-    // implicitly[Range.Aux[_3, _2 :: _1 :: _0 :: Nil]]
+    implicitly[Range.Aux[_0, Nil]]
+    implicitly[Range.Aux[_3, _2 :: _1 :: _0 :: Nil]]
 
-    // implicitly[Map.Aux[Conj[_1 :: _2 :: Nil], Nil, Nil]]
-    // implicitly[
-    //   Map.Aux[Conj[Nil], _1 :: _2 :: Nil, (_1 :: Nil) :: (_2 :: Nil) :: Nil]]
+    implicitly[Map.Aux[Conj[_1 :: _2 :: Nil], Nil, Nil]]
+    implicitly[
+      Map.Aux[Conj[Nil], _1 :: _2 :: Nil, (_1 :: Nil) :: (_2 :: Nil) :: Nil]]
 
-    // implicitly[MapCat.Aux[Conj[_1 :: _2 :: Nil], Nil, Nil]]
-    // implicitly[
-    //   MapCat.Aux[Conj[_2 :: Nil], _1 :: _1 :: Nil, _1 :: _2 :: _1 :: _2 :: Nil]]
+    implicitly[MapCat.Aux[Conj[_1 :: _2 :: Nil], Nil, Nil]]
+    implicitly[MapCat.Aux[Conj[_2 :: Nil], _1 :: _1 :: Nil, _1 :: _2 :: _1 :: _2 :: Nil]]
 
-    // trait SomeF extends Func
-    // trait FilterSpec extends FilterSpec0 {
-    //   implicit val sf1: Apply.Aux[SomeF, _2, False] = ???
-    //   implicitly[Filter.Aux[SomeF, _1 :: _2 :: _3 :: Nil, _1 :: _3 :: Nil]]
-    // }
-    // trait FilterSpec0 {
-    //   implicit def sf0[A]: Apply.Aux[SomeF, A, True] = ???
-    // }
+    trait SomeF extends Func
+    trait FilterSpec extends FilterSpec0 {
+      implicit val sf1: Apply.Aux[SomeF, _2, False] = ???
+      implicitly[Filter.Aux[SomeF, _1 :: _2 :: _3 :: Nil, _1 :: _3 :: Nil]]
+    }
+    trait FilterSpec0 {
+      implicit def sf0[A]: Apply.Aux[SomeF, A, True] = ???
+    }
 
-    // implicitly[Apply.Aux[QueenX[_0], _3, Queen[_0, _3]]]
-    // implicitly[Map.Aux[QueenX[_0],
-    //                    _1 :: _2 :: _3 :: Nil,
-    //                    Queen[_0, _1] :: Queen[_0, _2] :: Queen[_0, _3] :: Nil]]
+    implicitly[Apply.Aux[QueenX[_0], _3, Queen[_0, _3]]]
+    implicitly[
+      Map.Aux[
+        QueenX[_0],
+        _1 :: _2 :: _3 :: Nil,
+        Queen[_0, _1] :: Queen[_0, _2] :: Queen[_0, _3] :: Nil
+      ]
+    ]
 
-    // implicitly[QueensInRow.Aux[_0, _2, Queen[_0, _1] :: Queen[_0, _0] :: Nil]]
+    implicitly[QueensInRow.Aux[_0, _2, Queen[_0, _1] :: Queen[_0, _0] :: Nil]]
 
-    // implicitly[Threatens.Aux[Queen[_0, _0], Queen[_10, _9], False]]
-    // implicitly[Threatens.Aux[Queen[_0, _0], Queen[_1, _9], False]]
-    // implicitly[Threatens.Aux[Queen[_0, _0], Queen[_0, _9], True]]
-    // implicitly[Threatens.Aux[Queen[_0, _0], Queen[_9, _0], True]]
-    // implicitly[Threatens.Aux[Queen[_0, _0], Queen[_10, _10], True]]
+    implicitly[Threatens.Aux[Queen[_0, _0], Queen[_10, _9], False]]
+    implicitly[Threatens.Aux[Queen[_0, _0], Queen[_1, _9], False]]
+    implicitly[Threatens.Aux[Queen[_0, _0], Queen[_0, _9], True]]
+    implicitly[Threatens.Aux[Queen[_0, _0], Queen[_9, _0], True]]
+    implicitly[Threatens.Aux[Queen[_0, _0], Queen[_10, _10], True]]
 
-    // implicitly[Safe.Aux[Nil, Queen[_1, _2], True]]
-    // implicitly[Safe.Aux[Queen[_0, _0] :: Nil, Queen[_0, _2], False]]
-    // implicitly[Safe.Aux[Queen[_0, _0] :: Nil, Queen[_1, _2], True]]
-    // implicitly[Safe.Aux[Queen[_0, _0] :: Queen[_1, _2] :: Queen[_3, _5] :: Nil,
-    //                     Queen[_9, _6],
-    //                     True]]
+    implicitly[Safe.Aux[Nil, Queen[_1, _2], True]]
+    implicitly[Safe.Aux[Queen[_0, _0] :: Nil, Queen[_0, _2], False]]
+    implicitly[Safe.Aux[Queen[_0, _0] :: Nil, Queen[_1, _2], True]]
+    implicitly[Safe.Aux[Queen[_0, _0] :: Queen[_1, _2] :: Queen[_3, _5] :: Nil, Queen[_9, _6], True]]
 
-    // implicitly[
-    //   AddQueen.Aux[
-    //     _4,
-    //     _1,
-    //     Queen[_0, _0] :: Nil,
-    //     (Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: (Queen[_1, _2] :: Queen[
-    //       _0,
-    //       _0] :: Nil) :: Nil]
-    // ]
+    implicitly[
+      AddQueen.Aux[
+        _4, _1,
+        Queen[_0, _0] :: Nil,
+        (Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: 
+          (Queen[_1, _2] :: Queen[_0, _0] :: Nil) :: Nil
+      ]
+    ]
 
-    // implicitly[
-    //   Map.Aux[
-    //     AddQueen2[_4, _1],
-    //     (Queen[_0, _0] :: Nil) :: Nil,
-    //     ((Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: (Queen[_1, _2] :: Queen[
-    //       _0,
-    //       _0] :: Nil) :: Nil) :: Nil]
-    // ]
+    implicitly[
+      Map.Aux[
+        AddQueen2[_4, _1],
+        (Queen[_0, _0] :: Nil) :: Nil,
+        ((Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: 
+          (Queen[_1, _2] :: Queen[_0, _0] :: Nil) :: Nil) :: Nil
+      ]
+    ]
 
-    // implicitly[AddQueenToAll.Aux[_4, _1, Nil, Nil]]
-    // implicitly[
-    //   AddQueenToAll.Aux[_4,
-    //                     _1,
-    //                     (Queen[_0, _0] :: Nil) :: Nil,
-    //                     (Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: (Queen[
-    //                       _1,
-    //                       _2] :: Queen[_0, _0] :: Nil) :: Nil]
-    // ]
+    implicitly[AddQueenToAll.Aux[_4, _1, Nil, Nil]]
+    implicitly[
+      AddQueenToAll.Aux[
+        _4, _1,
+        (Queen[_0, _0] :: Nil) :: Nil,
+        (Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: (Queen[_1, _2] :: Queen[_0, _0] :: Nil) :: Nil
+      ]
+    ]
 
-    // implicitly[
-    //   AddQueensIf.Aux[False,
-    //                   _10,
-    //                   _7,
-    //                   (Queen[_0, _0] :: Nil) :: Nil,
-    //                   (Queen[_0, _0] :: Nil) :: Nil]]
-    // implicitly[
-    //   AddQueensIf.Aux[
-    //     True,
-    //     _4,
-    //     _1,
-    //     (Queen[_0, _0] :: Nil) :: Nil,
-    //     (Queen[_1, _3] :: Queen[_0, _0] :: Nil) :: (Queen[_1, _2] :: Queen[
-    //       _0,
-    //       _0] :: Nil) :: Nil]]
+    implicitly[
+      AddQueensIf.Aux[False,
+                      _10,
+                      _7,
+                      (Queen[_0, _0] :: Nil) :: Nil,
+                      (Queen[_0, _0] :: Nil) :: Nil]]
+    implicitly[
+      AddQueensIf.Aux[
+        True,
+        _4,
+        _2,
+        (Queen[_0, _0] :: Nil) :: Nil,
+        (Queen[_3, _1] :: Queen[_2, _3] :: Queen[_0, _0] :: Nil) :: Nil]]
+
+    implicitly[
+      AddQueens.Aux[
+        _4,
+        _2,
+        (Queen[_0, _0] :: Nil) :: Nil,
+        (Queen[_3, _1] :: Queen[_2, _3] :: Queen[_0, _0] :: Nil) :: Nil]]
+
+    implicitly[
+      Solution.Aux[
+        _4,
+        (Queen[_3, _1] :: Queen[_2, _3] :: Queen[_1, _0] :: Queen[_0, _2] :: Nil) ::
+        (Queen[_3, _2] :: Queen[_2, _0] :: Queen[_1, _3] :: Queen[_0, _1] :: Nil) :: Nil
+      ]
+    ]
   }
 }

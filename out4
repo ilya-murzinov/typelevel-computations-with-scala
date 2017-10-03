@@ -1,0 +1,23 @@
+q.Solution[q.Succ[q.Succ[q.Succ[q.Succ[q.Z]]]]]{type Out = q.Cons[
+  q.Cons[`q.Queen[q.Succ[q.Succ[q.Succ[q.Z]]],q.Succ[q.Z]]`,
+    q.Cons[`q.Queen[q.Succ[q.Succ[q.Z]],q.Succ[q.Succ[q.Succ[q.Z]]]`],
+      q.Cons[`q.Queen[q.Succ[q.Z],q.Z],
+        q.Cons[`q.Queen[q.Z,q.Succ[q.Succ[q.Z]]`],
+          q.Nil
+        ]
+      ]
+    ]
+  ],
+  q.Cons[
+    q.Cons[`q.Queen[q.Succ[q.Succ[q.Succ[q.Z]]],q.Succ[q.Succ[q.Z]]]`,
+      q.Cons[`q.Queen[q.Succ[q.Succ[q.Z]],q.Z]`,
+        q.Cons[`q.Queen[q.Succ[q.Z],q.Succ[q.Succ[q.Succ[q.Z]]]`],
+          q.Cons[`q.Queen[q.Z,q.Succ[q.Z]`],
+            q.Nil
+          ]
+        ]
+      ]
+    ],
+    q.Nil
+  ]
+]}
